@@ -11,8 +11,8 @@ import {
   EnhancedStep2SvgGeneration,
   EnhancedStep3CssImplementation,
   EnhancedStep4FinalGeneration,
-} from "./enhanced-step-components"
-import { ErrorBoundary, errorHandler } from "../utils/error-handler"
+} from "./code-editor/enhanced-step-components-simple"
+import { ErrorBoundary, errorHandler } from "@/utils/error-handler"
 
 interface GeneratorState {
   // Step 1

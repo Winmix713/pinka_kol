@@ -178,3 +178,20 @@ export const useErrorHandler = () => {
 
   return { error, handleError, clearError }
 }
+
+// Export additional utilities
+export const errorHandler = (error: Error | ErrorInfo) => {
+  console.error('Error occurred:', error)
+  
+  if (error instanceof Error) {
+    return {
+      message: error.message,
+      stack: error.stack,
+    }
+  }
+  
+  return error
+}
+
+// Export ErrorBoundary alias for compatibility
+export { GlobalErrorBoundary as ErrorBoundary }
