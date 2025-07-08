@@ -7,8 +7,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { motion, AnimatePresence } from "framer-motion"
@@ -17,27 +15,19 @@ import {
   Video,
   Box,
   ChevronRight,
-  Plus,
-  ZoomIn,
-  Aperture,
-  Palette,
-  GripHorizontal,
-  ChevronDown,
   Globe,
   X,
-  Eye,
-  EyeOff,
   Loader2,
   ExternalLink,
   CheckCircle,
   Clock,
   XCircle,
   Download,
-  Maximize,
   AlertTriangle,
   Code2,
 } from "lucide-react"
 import { FigmaPreviewModal } from "@/components/figma-preview-modal"
+import { ExportModal } from "../components/export-modal/export-modal"
 // 1️⃣  Add Providers import
 import Providers from "./providers"
 
@@ -46,13 +36,6 @@ interface SidebarItem {
   name: string
   icon: React.ReactNode
   hasChevron: boolean
-}
-
-interface ExportConfig {
-  id: string
-  scale: string
-  colorProfile: "sRGB" | "Adobe Color"
-  activeFormat: "PNG" | "JPG"
 }
 
 interface FigmaFile {
@@ -66,7 +49,11 @@ interface FigmaFile {
 interface ExportJob {
   id: string
   figma_file_id: string
-  config: ExportConfig
+  config: {
+    scale: string;
+    colorProfile: string;
+    activeFormat: string;
+  }
   status: "pending" | "processing" | "completed" | "failed"
   result_url?: string
   error_message?: string
@@ -1199,21 +1186,8 @@ function FigmaExportToolInner() {
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
   const [currentFile, setCurrentFile] = useState<FigmaFile | null>(null)
   const [isImporting, setIsImporting] = useState(false)
-  const [compressionValue, setCompressionValue] = useState<number>(80)
-  const [exportConfigs, setExportConfigs] = useState<ExportConfig[]>([
-    {
-      id: "1x",
-      scale: "1x",
-      colorProfile: "sRGB",
-      activeFormat: "PNG",
-    },
-    {
-      id: "2x",
-      scale: "2x",
-      colorProfile: "Adobe Color",
-      activeFormat: "JPG",
-    },
-  ])
+
+
   const [exportJobs, setExportJobs] = useState<ExportJob[]>([])
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -1259,7 +1233,7 @@ function FigmaExportToolInner() {
   }, [jobs])
 
   const exportMutation = useMutation({
-    mutationFn: async (data: { figmaFileId: string; configs: ExportConfig[] }) => {
+    mutationFn: async (data: { figmaFileId: string; configs: any[] }) => {
       await new Promise((resolve) => setTimeout(resolve, 1000))
       return {
         success: true,
@@ -1290,28 +1264,8 @@ function FigmaExportToolInner() {
     },
   })
 
-  const updateExportConfig = (configId: string, updates: Partial<ExportConfig>) => {
-    setExportConfigs((prev) => prev.map((config) => (config.id === configId ? { ...config, ...updates } : config)))
-  }
 
-  const addExportConfig = () => {
-    const newId = `${exportConfigs.length + 1}x`
-    setExportConfigs((prev) => [
-      ...prev,
-      {
-        id: newId,
-        scale: newId,
-        colorProfile: "sRGB",
-        activeFormat: "PNG",
-      },
-    ])
-  }
 
-  const removeExportConfig = (configId: string) => {
-    if (exportConfigs.length > 1) {
-      setExportConfigs((prev) => prev.filter((config) => config.id !== configId))
-    }
-  }
 
   const handleItemClick = (itemName: string) => {
     setActiveItem(itemName)
@@ -1374,7 +1328,7 @@ function FigmaExportToolInner() {
     }
     exportMutation.mutate({
       figmaFileId: currentFile.id,
-      configs: exportConfigs,
+      configs: [], // ExportModal manages its own export configurations
     })
   }
 
@@ -1536,15 +1490,7 @@ function FigmaExportToolInner() {
                   </div>
                 </div>
               ) : (
-                <ExportSettings
-                  exportConfigs={exportConfigs}
-                  updateExportConfig={updateExportConfig}
-                  addExportConfig={addExportConfig}
-                  removeExportConfig={removeExportConfig}
-                  compressionValue={compressionValue}
-                  setCompressionValue={setCompressionValue}
-                  language={language}
-                />
+                <ExportModal />
               )}
             </section>
             {/* Footer */}
