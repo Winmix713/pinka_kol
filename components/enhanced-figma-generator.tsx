@@ -11,8 +11,8 @@ import {
   EnhancedStep2SvgGeneration,
   EnhancedStep3CssImplementation,
   EnhancedStep4FinalGeneration,
-} from "./enhanced-step-components"
-import { ErrorBoundary, errorHandler } from "../utils/error-handler"
+} from "../code-editor/enhanced-step-components"
+import { GlobalErrorBoundary, useErrorHandler } from "../utils/error-handler"
 
 interface GeneratorState {
   // Step 1
@@ -89,6 +89,7 @@ const initialState: GeneratorState = {
 
 export const EnhancedFigmaGenerator: React.FC = () => {
   const [state, setState] = useState<GeneratorState>(initialState)
+  const { handleError } = useErrorHandler()
 
   // Helper function to update state
   const updateState = useCallback((updates: Partial<GeneratorState>) => {
@@ -140,9 +141,8 @@ export const EnhancedFigmaGenerator: React.FC = () => {
           svgCode: mockSvgCode,
         })
       } catch (error) {
-        const errorMessage = errorHandler.handleError(
+        const errorMessage = handleError(
           error instanceof Error ? error : new Error("Connection failed"),
-          "step1",
         )
 
         updateState({
@@ -151,7 +151,7 @@ export const EnhancedFigmaGenerator: React.FC = () => {
         })
       }
     },
-    [state, updateState],
+    [state, updateState, handleError],
   )
 
   // Step 2: Generate TSX from SVG
@@ -230,18 +230,17 @@ export const Button: React.FC<ButtonProps> = ({
       updateState({
         cssCode: mockCssCode,
       })
-    } catch (error) {
-      const errorMessage = errorHandler.handleError(
+      } catch (error) {
+      const errorMessage = handleError(
         error instanceof Error ? error : new Error("SVG conversion failed"),
-        "step2",
       )
 
       updateState({
         loading: { ...state.loading, step2: false },
         errors: { ...state.errors, step2: errorMessage },
       })
-    }
-  }, [state, updateState])
+      }
+      }, [state, updateState, handleError])
 
   // Step 3: Save CSS
   const handleCssSave = useCallback(async () => {
@@ -260,17 +259,16 @@ export const Button: React.FC<ButtonProps> = ({
         success: { ...state.success, step3: true },
       })
     } catch (error) {
-      const errorMessage = errorHandler.handleError(
+      const errorMessage = handleError(
         error instanceof Error ? error : new Error("CSS save failed"),
-        "step3",
       )
 
       updateState({
         loading: { ...state.loading, step3: false },
         errors: { ...state.errors, step3: errorMessage },
       })
-    }
-  }, [state, updateState])
+      }
+      }, [state, updateState, handleError])
 
   // Step 4: Generate Final Code
   const handleFinalGenerate = useCallback(async () => {
@@ -295,17 +293,16 @@ export const Button: React.FC<ButtonProps> = ({
         success: { ...state.success, step4: true },
       })
     } catch (error) {
-      const errorMessage = errorHandler.handleError(
+      const errorMessage = handleError(
         error instanceof Error ? error : new Error("Final generation failed"),
-        "step4",
       )
 
       updateState({
         loading: { ...state.loading, step4: false },
         errors: { ...state.errors, step4: errorMessage },
       })
-    }
-  }, [state, updateState])
+      }
+      }, [state, updateState, handleError])
 
   // Reset all
   const handleReset = useCallback(() => {
@@ -408,7 +405,7 @@ export const Button: React.FC<ButtonProps> = ({
 
             <EnhancedStep2SvgGeneration
               svgCode={state.svgCode}
-              onSvgChange={(code) => updateState({ svgCode: code })}
+              onSvgChange={(code: string) => updateState({ svgCode: code })}
               onGenerate={handleSvgGenerate}
               isLoading={state.loading.step2}
               error={state.errors.step2}
@@ -417,7 +414,7 @@ export const Button: React.FC<ButtonProps> = ({
 
             <EnhancedStep3CssImplementation
               cssCode={state.cssCode}
-              onCssChange={(code) => updateState({ cssCode: code })}
+              onCssChange={(code: string) => updateState({ cssCode: code })}
               onSave={handleCssSave}
               isLoading={state.loading.step3}
               error={state.errors.step3}
@@ -427,8 +424,8 @@ export const Button: React.FC<ButtonProps> = ({
             <EnhancedStep4FinalGeneration
               jsxCode={state.jsxCode}
               moreCssCode={state.moreCssCode}
-              onJsxChange={(code) => updateState({ jsxCode: code })}
-              onCssChange={(code) => updateState({ moreCssCode: code })}
+              onJsxChange={(code: string) => updateState({ jsxCode: code })}
+              onCssChange={(code: string) => updateState({ moreCssCode: code })}
               onGenerate={handleFinalGenerate}
               isLoading={state.loading.step4}
               error={state.errors.step4}

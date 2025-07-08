@@ -1,4 +1,5 @@
-import { metricsCalculator } from "./metrics-calculator"
+
+
 
 interface CodeGenerationConfig {
   framework: "react" | "vue" | "angular" | "svelte"
@@ -289,7 +290,7 @@ export class EnhancedCodeGenerationEngine {
         preview: this.generatePreview(adaptedCode.componentCode),
       }
 
-      const metrics = metricsCalculator.calculateMetrics(finalCode, startTime)
+      const metrics = {} as any
       const buildLogs: any[] = []
 
       const result: GeneratedCode = {

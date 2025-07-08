@@ -328,7 +328,7 @@ export const Step4FinalGeneration: React.FC = () => {
                   <span className="text-sm font-medium text-green-800">Type Definitions</span>
                 </div>
                 <p className="text-xs text-green-600">
-                  {stepData.finalTypesCode ? stepData.finalTypesCode.split("\n").length : 0} lines
+                  {stepData.finalTsxCode ? stepData.finalTsxCode.split("\n").length : 0} lines
                 </p>
               </div>
             </div>

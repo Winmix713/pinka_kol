@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance } from "axios"
-import type { FigmaFile, FigmaVariable, FigmaVariableCollection } from "../types/figma.js"
+import type { FigmaFile } from "../types/figma.ts"
 
 export class FigmaAPI {
   private client: AxiosInstance
@@ -35,12 +35,7 @@ export class FigmaAPI {
     return response.data
   }
 
-  async getFileVariables(fileId: string): Promise<{
-    meta: {
-      variableCollections: Record<string, FigmaVariableCollection>
-      variables: Record<string, FigmaVariable>
-    }
-  }> {
+  async getFileVariables(fileId: string): Promise<any> {
     const response = await this.client.get(`/files/${fileId}/variables/local`)
     return response.data
   }
